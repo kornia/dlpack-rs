@@ -1,0 +1,20 @@
+[package]
+name = "test-dlpack-rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ndarray = "0.13.1"
+pyo3 = { version = "0.15.1", features = ["extension-module"] }
+
+
+[build-dependencies]
+bindgen = "0.31"
+
+[lib]
+name = "test_dlpack_rs"
+crate-type = ["cdylib", "lib"]
+#crate-type = ["rlib", "cdylib", "lib"]
+path = "src/lib.rs"
