@@ -1,0 +1,20 @@
+# from: https://github.com/strasdat/vviz/blob/main/.github/workflows/ci.yml
+name: Continuous integration
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_and_test:
+    name: Rust project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Git Sumbodule Update
+        run: |
+          git submodule update --init --recursive
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo build --release --all-features
+
