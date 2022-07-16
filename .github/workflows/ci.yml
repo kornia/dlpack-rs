@@ -22,7 +22,7 @@ jobs:
       - name: "Cargo test"
         run: cargo test
       - name: "Cargo package"
-        run: cargo package
+        run: cargo package --no-verify
       - if: github.event.review.state == 'approved'
         name: "Cargo publish"
-        run: cargo login --token ${{ secrets.CRATES_TOKEN }} && cargo publish --no-verify
+        run: cargo login --token ${{ secrets.CRATES_TOKEN }} && cargo publish
