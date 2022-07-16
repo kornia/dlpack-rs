@@ -23,6 +23,6 @@ jobs:
         run: cargo test
       - name: "Cargo package"
         run: cargo package --no-verify
-      - if: github.event.review.state == 'approved'
-        name: "Cargo publish"
-        run: cargo login --token ${{ secrets.CARGO_REGISTRY_TOKEN }} && cargo publish
+      - run: cargo publish --token ${CARGO_REGISTRY_TOKEN}
+        env:
+          CRATES_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
