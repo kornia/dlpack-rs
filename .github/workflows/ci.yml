@@ -19,6 +19,7 @@ jobs:
         with:
           toolchain: stable
       - run: cargo build --release --all-features
+      - uses: stefanzweifel/git-auto-commit-action@v4
       - name: "Cargo test"
         run: cargo test
       - name: "Cargo package"
