@@ -21,3 +21,8 @@ jobs:
       - run: cargo build --release --all-features
       - name: "Cargo test"
         run: cargo test
+      - name: "Cargo package"
+        run: cargo package
+      - if: github.event.review.state == 'approved'
+        name: "Cargo publish"
+        run: cargo login --token ${{ secrets.CRATES_TOKEN }} && cargo publish --no-verify
