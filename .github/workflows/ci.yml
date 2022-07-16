@@ -3,6 +3,8 @@ name: Continuous integration
 
 on:
   workflow_dispatch:
+  push:
+  pull_request:
 
 jobs:
   build_and_test:
