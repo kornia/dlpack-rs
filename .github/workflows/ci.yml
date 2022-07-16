@@ -20,6 +20,9 @@ jobs:
           toolchain: stable
       - run: cargo build --release --all-features
       - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update dlpack.rs
+          file_pattern: dlpack.rs
       - name: "Cargo test"
         run: cargo test
       - name: "Cargo package"
