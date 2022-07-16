@@ -17,4 +17,5 @@ jobs:
         with:
           toolchain: stable
       - run: cargo build --release --all-features
-
+      - name: "Cargo test"
+        run: cargo test
