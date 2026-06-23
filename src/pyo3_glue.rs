@@ -43,8 +43,9 @@ const NAME_USED_DLTENSOR_VERSIONED: &CStr = c"used_dltensor_versioned";
 /// If a consumer renamed it to `"used_dltensor"` via `PyTensor::from_pyany`, we do nothing
 /// — the consumer's `Drop` will call the deleter instead.
 unsafe extern "C" fn capsule_destructor_legacy(capsule: *mut pyffi::PyObject) {
-    // SAFETY: `capsule` is a valid PyObject* (PyCapsule) being destroyed by the GC.
-    // We must NOT hold the GIL here (Python calls destructors while holding it already).
+    // SAFETY: Python calls capsule destructors with the GIL already held; do NOT call
+    // Python::attach or attempt to re-acquire the GIL here (would deadlock).
+    // `capsule` is a valid PyCapsule* being finalized.
     let name_ptr = unsafe { pyffi::PyCapsule_GetName(capsule) };
 
     // Check if the name is still "dltensor" (i.e. not renamed to "used_dltensor").
@@ -75,7 +76,9 @@ unsafe extern "C" fn capsule_destructor_legacy(capsule: *mut pyffi::PyObject) {
 
 /// Capsule destructor for the versioned `"dltensor_versioned"` capsule.
 unsafe extern "C" fn capsule_destructor_versioned(capsule: *mut pyffi::PyObject) {
-    // SAFETY: same contract as capsule_destructor_legacy.
+    // SAFETY: Python calls capsule destructors with the GIL already held; do NOT call
+    // Python::attach or attempt to re-acquire the GIL here (would deadlock).
+    // `capsule` is a valid PyCapsule* being finalized.
     let name_ptr = unsafe { pyffi::PyCapsule_GetName(capsule) };
     if name_ptr.is_null() {
         return;
@@ -162,8 +165,11 @@ pub trait IntoDLPack: Sized + Send + 'static {
 // ──────────────────────────────────────────────────────────────────────────────
 
 /// Describes which DLPack protocol variant was used.
+///
+/// Named `DLPackVariant` (not `DLPackVersion`) to avoid shadowing the C-ABI struct
+/// `ffi::DLPackVersion { major, minor }` whose name is mandated by the DLPack spec.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum DLPackVersion {
+pub enum DLPackVariant {
     /// Legacy `DLManagedTensor` capsule named `"dltensor"`.
     Legacy,
     /// Versioned `DLManagedTensorVersioned` capsule named `"dltensor_versioned"`.
@@ -189,7 +195,7 @@ pub struct PyTensor {
     /// Raw pointer to the DLManagedTensor (legacy) or DLManagedTensorVersioned.
     ptr: *mut c_void,
     /// Which variant we consumed.
-    version: DLPackVersion,
+    version: DLPackVariant,
 }
 
 // SAFETY: PyTensor owns the pointed-to data exclusively; raw pointer is not Clone/Copy.
@@ -224,9 +230,9 @@ impl PyTensor {
         };
 
         let version = if name_cstr == NAME_DLTENSOR {
-            DLPackVersion::Legacy
+            DLPackVariant::Legacy
         } else if name_cstr == NAME_DLTENSOR_VERSIONED {
-            DLPackVersion::Versioned
+            DLPackVariant::Versioned
         } else {
             return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!(
                 "unexpected DLPack capsule name: expected 'dltensor' or 'dltensor_versioned', got {:?}",
@@ -239,8 +245,8 @@ impl PyTensor {
 
         // 5. Rename the capsule → prevent the C destructor from calling deleter on GC.
         let new_name = match version {
-            DLPackVersion::Legacy => NAME_USED_DLTENSOR.as_ptr(),
-            DLPackVersion::Versioned => NAME_USED_DLTENSOR_VERSIONED.as_ptr(),
+            DLPackVariant::Legacy => NAME_USED_DLTENSOR.as_ptr(),
+            DLPackVariant::Versioned => NAME_USED_DLTENSOR_VERSIONED.as_ptr(),
         };
         // SAFETY: capsule.as_ptr() is a valid PyCapsule* with thread attached.
         // new_name is a &'static CStr pointer so it outlives the capsule.
@@ -260,7 +266,7 @@ impl PyTensor {
     }
 
     /// Which DLPack variant was imported.
-    pub fn dlpack_version(&self) -> DLPackVersion {
+    pub fn dlpack_version(&self) -> DLPackVariant {
         self.version
     }
 
@@ -272,11 +278,11 @@ impl PyTensor {
     /// `ptr` is valid for as long as `self` is alive; caller must not call the deleter.
     fn dl_tensor(&self) -> &crate::ffi::DLTensor {
         match self.version {
-            DLPackVersion::Legacy => {
+            DLPackVariant::Legacy => {
                 // SAFETY: ptr is a valid *mut DLManagedTensor produced by safe::pack.
                 unsafe { &(*(self.ptr as *const DLManagedTensor)).dl_tensor }
             }
-            DLPackVersion::Versioned => {
+            DLPackVariant::Versioned => {
                 // SAFETY: ptr is a valid *mut DLManagedTensorVersioned produced by safe::pack_versioned.
                 unsafe { &(*(self.ptr as *const DLManagedTensorVersioned)).dl_tensor }
             }
@@ -319,6 +325,8 @@ impl PyTensor {
     }
 
     /// Raw data pointer (untyped).
+    ///
+    /// Note: the first element is at `data_ptr()` advanced by `byte_offset()` bytes.
     pub fn data_ptr(&self) -> *mut c_void {
         self.dl_tensor().data
     }
@@ -373,7 +381,7 @@ impl Drop for PyTensor {
         // The capsule destructor has been neutralised (name renamed to "used_*"),
         // so this is the sole deallocation path.
         match self.version {
-            DLPackVersion::Legacy => {
+            DLPackVariant::Legacy => {
                 let mt = self.ptr as *mut DLManagedTensor;
                 // SAFETY: mt was produced by safe::pack and renamed in from_pyany to prevent
                 // double-free. This Drop is the one and only call to the deleter.
@@ -381,7 +389,7 @@ impl Drop for PyTensor {
                     unsafe { del(mt) };
                 }
             }
-            DLPackVersion::Versioned => {
+            DLPackVariant::Versioned => {
                 let mt = self.ptr as *mut DLManagedTensorVersioned;
                 // SAFETY: as above, for the versioned variant.
                 if let Some(del) = unsafe { (*mt).deleter } {
