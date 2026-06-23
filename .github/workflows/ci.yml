@@ -1,30 +1,74 @@
-# from: https://github.com/strasdat/vviz/blob/main/.github/workflows/ci.yml
-name: Continuous integration
+name: CI
 
 on:
-  workflow_dispatch:
+  push:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
-  build_and_test:
-    name: Rust project
+  fmt:
+    name: rustfmt check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Git Sumbodule Update
-        run: |
-          git submodule update --init --recursive
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-      - run: cargo build --release --all-features
-      - uses: stefanzweifel/git-auto-commit-action@v4
+          components: rustfmt
+      - run: cargo fmt --check
+
+  clippy-no-default:
+    name: clippy (no-default-features)
+    runs-on: ubuntu-latest
+    needs: fmt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          commit_message: Update dlpack.rs
-          file_pattern: dlpack.rs
-      - name: "Cargo test"
-        run: cargo test
-      - name: "Cargo package"
-        run: cargo package --no-verify
-      - run: cargo publish --no-verify --token ${CRATES_TOKEN}
-        env:
-          CRATES_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          components: clippy
+      - run: cargo clippy --no-default-features -- -D warnings
+
+  clippy-pyo3:
+    name: clippy (--features pyo3)
+    runs-on: ubuntu-latest
+    needs: fmt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - run: cargo clippy --features pyo3 -- -D warnings
+
+  test:
+    name: test (no-default-features)
+    runs-on: ubuntu-latest
+    needs: [clippy-no-default, clippy-pyo3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --no-default-features
+
+  # aarch64 native job.
+  # GitHub-hosted aarch64 runners are available as "ubuntu-24.04-arm" on public repos.
+  # If the runner label is unavailable on your plan, replace with ubuntu-latest and add
+  # a QEMU step: uses: docker/setup-qemu-action@v3 / with: platforms: linux/arm64.
+  clippy-aarch64:
+    name: clippy aarch64 (--features pyo3)
+    runs-on: ubuntu-24.04-arm
+    needs: fmt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - run: cargo clippy --features pyo3 -- -D warnings
+
+  test-aarch64:
+    name: test aarch64 (no-default-features)
+    runs-on: ubuntu-24.04-arm
+    needs: clippy-aarch64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --no-default-features
