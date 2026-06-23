@@ -94,6 +94,9 @@ mod tests {
         // DLManagedTensor: DLTensor(48) + manager_ctx(8) + deleter fn-ptr(8) = 64
         assert_eq!(size_of::<DLManagedTensor>(), 64);
         assert_eq!(size_of::<DLPackVersion>(), 8);
+        // DLManagedTensorVersioned on LP64 (aarch64 measured):
+        //   DLPackVersion(8) + manager_ctx ptr(8) + deleter fn-ptr(8) + flags u64(8) + DLTensor(48) = 80
+        assert_eq!(size_of::<DLManagedTensorVersioned>(), 80);
         assert_eq!(K_DL_CPU, 1);
         assert_eq!(K_DL_FLOAT, 2);
     }
