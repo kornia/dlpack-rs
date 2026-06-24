@@ -11,4 +11,9 @@ links = "dlpack"
 doctest = false
 
 [build-dependencies]
-bindgen = "0.71"
+bindgen = { version = "0.71", optional = true }
+
+[features]
+# default build uses the committed src/bindings.rs (no libclang needed)
+default = []
+bindgen = ["dep:bindgen"]

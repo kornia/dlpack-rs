@@ -33,5 +33,4 @@ pub const K_DL_BOOL: u8 = DLDataTypeCode::kDLBool as u8;
 pub const DLPACK_FLAG_BITMASK_READ_ONLY: u64 = dlpack_sys::DLPACK_FLAG_BITMASK_READ_ONLY as u64;
 
 /// Is-copied bitmask for `DLManagedTensorVersioned::flags` (u64).
-pub const DLPACK_FLAG_BITMASK_IS_COPIED: u64 =
-    dlpack_sys::DLPACK_FLAG_BITMASK_IS_COPIED as u64;
+pub const DLPACK_FLAG_BITMASK_IS_COPIED: u64 = dlpack_sys::DLPACK_FLAG_BITMASK_IS_COPIED as u64;
