@@ -1,8 +1,12 @@
+[workspace]
+members = [".", "dlpack-sys"]
+resolver = "2"
+
 [package]
 name = "dlpack-rs"
 description = "Portable Rust bindings for the DLPack protocol (FFI + safe wrappers + optional pyo3 glue)"
 repository = "https://github.com/kornia/dlpack-rs"
-version = "0.2.0"
+version = "0.3.0"
 license = "Apache-2.0"
 edition = "2021"
 
@@ -11,4 +15,5 @@ default = []
 pyo3 = ["dep:pyo3"]
 
 [dependencies]
+dlpack-sys = { path = "dlpack-sys", version = "0.3.0" }
 pyo3 = { version = "0.28", optional = true }

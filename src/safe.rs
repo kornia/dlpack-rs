@@ -51,61 +51,61 @@ impl TensorInfo {
 
 pub fn cpu_device() -> DLDevice {
     DLDevice {
-        device_type: K_DL_CPU,
+        device_type: DLDeviceType::kDLCPU,
         device_id: 0,
     }
 }
 pub fn cuda_device(id: i32) -> DLDevice {
     DLDevice {
-        device_type: K_DL_CUDA,
+        device_type: DLDeviceType::kDLCUDA,
         device_id: id,
     }
 }
 pub fn dtype_u8() -> DLDataType {
     DLDataType {
-        code: K_DL_UINT,
+        code: DLDataTypeCode::kDLUInt as u8,
         bits: 8,
         lanes: 1,
     }
 }
 pub fn dtype_u16() -> DLDataType {
     DLDataType {
-        code: K_DL_UINT,
+        code: DLDataTypeCode::kDLUInt as u8,
         bits: 16,
         lanes: 1,
     }
 }
 pub fn dtype_i32() -> DLDataType {
     DLDataType {
-        code: K_DL_INT,
+        code: DLDataTypeCode::kDLInt as u8,
         bits: 32,
         lanes: 1,
     }
 }
 pub fn dtype_i64() -> DLDataType {
     DLDataType {
-        code: K_DL_INT,
+        code: DLDataTypeCode::kDLInt as u8,
         bits: 64,
         lanes: 1,
     }
 }
 pub fn dtype_f32() -> DLDataType {
     DLDataType {
-        code: K_DL_FLOAT,
+        code: DLDataTypeCode::kDLFloat as u8,
         bits: 32,
         lanes: 1,
     }
 }
 pub fn dtype_f64() -> DLDataType {
     DLDataType {
-        code: K_DL_FLOAT,
+        code: DLDataTypeCode::kDLFloat as u8,
         bits: 64,
         lanes: 1,
     }
 }
 pub fn dtype_bool() -> DLDataType {
     DLDataType {
-        code: K_DL_BOOL,
+        code: DLDataTypeCode::kDLBool as u8,
         bits: 8,
         lanes: 1,
     }

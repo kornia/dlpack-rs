@@ -16,6 +16,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
+      - name: Install libclang
+        run: sudo apt-get update && sudo apt-get install -y libclang-dev clang
       - run: cargo fmt --check
 
   clippy-no-default:
@@ -27,6 +29,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
+      - name: Install libclang
+        run: sudo apt-get update && sudo apt-get install -y libclang-dev clang
       - run: cargo clippy --no-default-features -- -D warnings
 
   clippy-pyo3:
@@ -38,6 +42,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
+      - name: Install libclang
+        run: sudo apt-get update && sudo apt-get install -y libclang-dev clang
       - run: cargo clippy --features pyo3 -- -D warnings
 
   test:
@@ -47,6 +53,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - name: Install libclang
+        run: sudo apt-get update && sudo apt-get install -y libclang-dev clang
       - run: cargo test --no-default-features
 
   # aarch64 native job.
@@ -62,6 +70,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
+      - name: Install libclang
+        run: sudo apt-get update && sudo apt-get install -y libclang-dev clang
       - run: cargo clippy --features pyo3 -- -D warnings
 
   test-aarch64:
@@ -71,4 +81,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - name: Install libclang
+        run: sudo apt-get update && sudo apt-get install -y libclang-dev clang
       - run: cargo test --no-default-features
