@@ -65,7 +65,7 @@ dependencies = [
 
 [[package]]
 name = "dlpack-rs"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "dlpack-sys",
  "pyo3",
@@ -73,7 +73,7 @@ dependencies = [
 
 [[package]]
 name = "dlpack-sys"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "bindgen",
 ]

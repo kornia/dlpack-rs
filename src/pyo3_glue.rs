@@ -377,26 +377,34 @@ impl PyTensor {
 
 impl Drop for PyTensor {
     fn drop(&mut self) {
-        // Call the producer's deleter exactly once.
+        // SAFETY/GIL: the producer's deleter may re-enter Python (e.g. torch frees a
+        // TensorImpl), so it MUST run under the GIL. Drop can fire off-GIL (Rust-side),
+        // so we acquire it here. Python::attach is reentrant-safe when already held,
+        // and a no-op cost-wise when the GIL is already owned by this thread.
+        //
         // The capsule destructor has been neutralised (name renamed to "used_*"),
-        // so this is the sole deallocation path.
-        match self.version {
-            DLPackVariant::Legacy => {
-                let mt = self.ptr as *mut DLManagedTensor;
-                // SAFETY: mt was produced by safe::pack and renamed in from_pyany to prevent
-                // double-free. This Drop is the one and only call to the deleter.
-                if let Some(del) = unsafe { (*mt).deleter } {
-                    unsafe { del(mt) };
+        // so this is the sole deallocation path — exactly once.
+        let ptr = self.ptr;
+        let version = self.version;
+        Python::attach(|_py| {
+            match version {
+                DLPackVariant::Legacy => {
+                    let mt = ptr as *mut DLManagedTensor;
+                    // SAFETY: mt was produced by safe::pack and renamed in from_pyany to
+                    // prevent double-free. This Drop is the one and only call to the deleter.
+                    if let Some(del) = unsafe { (*mt).deleter } {
+                        unsafe { del(mt) };
+                    }
+                }
+                DLPackVariant::Versioned => {
+                    let mt = ptr as *mut DLManagedTensorVersioned;
+                    // SAFETY: as above, for the versioned variant.
+                    if let Some(del) = unsafe { (*mt).deleter } {
+                        unsafe { del(mt) };
+                    }
                 }
             }
-            DLPackVariant::Versioned => {
-                let mt = self.ptr as *mut DLManagedTensorVersioned;
-                // SAFETY: as above, for the versioned variant.
-                if let Some(del) = unsafe { (*mt).deleter } {
-                    unsafe { del(mt) };
-                }
-            }
-        }
+        });
     }
 }
 
