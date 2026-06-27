@@ -1,5 +1,6 @@
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-#![allow(non_snake_case)]
-
-include!(concat!(env!("CARGO_MANIFEST_DIR"), "/dlpack.rs"));
+//! Portable DLPack bindings: raw FFI ([`ffi`]), safe builders ([`safe`]),
+//! and optional pyo3 capsule glue (feature `pyo3`).
+pub mod ffi;
+#[cfg(feature = "pyo3")]
+pub mod pyo3_glue;
+pub mod safe;

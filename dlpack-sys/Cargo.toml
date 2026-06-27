@@ -1,0 +1,19 @@
+[package]
+name = "dlpack-sys"
+version = "0.3.2"
+edition = "2021"
+description = "Auto-generated FFI bindings for DLPack (dmlc/dlpack v1.3) via bindgen"
+license = "Apache-2.0"
+repository = "https://github.com/kornia/dlpack-rs"
+links = "dlpack"
+
+[lib]
+doctest = false
+
+[build-dependencies]
+bindgen = { version = "0.71", optional = true }
+
+[features]
+# default build uses the committed src/bindings.rs (no libclang needed)
+default = []
+bindgen = ["dep:bindgen"]
