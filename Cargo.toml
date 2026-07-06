@@ -1,19 +1,26 @@
-[workspace]
-members = [".", "dlpack-sys"]
-resolver = "2"
-
 [package]
 name = "dlpack-rs"
 description = "Portable Rust bindings for the DLPack protocol (FFI + safe wrappers + optional pyo3 glue)"
 repository = "https://github.com/kornia/dlpack-rs"
-version = "0.3.2"
+version = "0.3.3"
 license = "Apache-2.0"
 edition = "2021"
+
+[lib]
+# The bindgen-generated bindings carry DLPack's C doc comments; some contain
+# fenced blocks that rustdoc would treat as (failing) doctests. No real
+# doctests in this crate.
+doctest = false
 
 [features]
 default = []
 pyo3 = ["dep:pyo3"]
+# Regenerate src/bindings.rs from vendor/dlpack/dlpack.h (needs libclang).
+# Default builds use the committed bindings — no libclang required.
+bindgen = ["dep:bindgen"]
 
 [dependencies]
-dlpack-sys = { path = "dlpack-sys", version = "0.3.2" }
 pyo3 = { version = "0.28", optional = true }
+
+[build-dependencies]
+bindgen = { version = "0.71", optional = true }
