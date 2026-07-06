@@ -1,0 +1,3 @@
+[submodule "vendor/dlpack"]
+	path = vendor/dlpack
+	url = https://github.com/dmlc/dlpack
