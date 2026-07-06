@@ -1,7 +1,8 @@
 fn main() {
     #[cfg(feature = "bindgen")]
     {
-        let header = "vendor/dlpack/dlpack.h";
+        // dmlc/dlpack submodule (pinned to a specific commit); header under include/.
+        let header = "vendor/dlpack/include/dlpack/dlpack.h";
         println!("cargo:rerun-if-changed={header}");
         let bindings = bindgen::Builder::default()
             .header(header)

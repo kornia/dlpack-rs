@@ -2,9 +2,21 @@
 name = "dlpack-rs"
 description = "Portable Rust bindings for the DLPack protocol (FFI + safe wrappers + optional pyo3 glue)"
 repository = "https://github.com/kornia/dlpack-rs"
-version = "0.3.3"
+version = "0.3.4"
 license = "Apache-2.0"
 edition = "2021"
+# vendor/dlpack is a git submodule (the full dmlc/dlpack repo). Whitelist only
+# what the published crate needs — the header (so the `bindgen` feature works
+# from a crates.io checkout) + LICENSE — instead of shipping dmlc's docs/tests.
+include = [
+    "/src/**",
+    "/build.rs",
+    "/Cargo.toml",
+    "/README.md",
+    "/LICENSE",
+    "/vendor/dlpack/include/dlpack/dlpack.h",
+    "/vendor/dlpack/LICENSE",
+]
 
 [lib]
 # The bindgen-generated bindings carry DLPack's C doc comments; some contain
