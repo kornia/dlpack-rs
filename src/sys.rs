@@ -1,9 +1,15 @@
+//! Auto-generated DLPack FFI bindings (rust-bindgen from `vendor/dlpack/dlpack.h`).
+//!
+//! Formerly the separate `dlpack-rs-sys` crate; inlined here so `dlpack-rs`
+//! publishes to crates.io as a single crate (no sys crate to publish).
+//! Regenerate `bindings.rs` with `--features bindgen` (needs libclang).
 #![allow(
     non_upper_case_globals,
     non_camel_case_types,
     non_snake_case,
     dead_code
 )]
+
 include!("bindings.rs");
 
 #[cfg(test)]

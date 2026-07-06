@@ -4,3 +4,4 @@ pub mod ffi;
 #[cfg(feature = "pyo3")]
 pub mod pyo3_glue;
 pub mod safe;
+mod sys;
