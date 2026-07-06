@@ -84,6 +84,6 @@ jobs:
       - name: Install libclang
         run: sudo apt-get update && sudo apt-get install -y libclang-dev clang
       - name: Regenerate bindings
-        run: cargo build -p dlpack-sys --features bindgen
+        run: cargo build --features bindgen
       - name: Check committed bindings are up to date
-        run: git diff --exit-code dlpack-sys/src/bindings.rs
+        run: git diff --exit-code src/bindings.rs
