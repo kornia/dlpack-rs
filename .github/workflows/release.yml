@@ -27,7 +27,12 @@ jobs:
           fi
 
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: dtolnay/rust-toolchain@stable
+
+      - name: Check the vendored DLPack header is packaged
+        run: cargo package --list | grep -qx 'vendor/dlpack/include/dlpack/dlpack.h'
 
       - name: cargo publish --dry-run
         run: cargo publish --dry-run
