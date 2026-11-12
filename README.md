@@ -17,11 +17,13 @@ Add to `Cargo.toml`:
 
 ```toml
 # no pyo3 glue (pure Rust, no Python dependency):
-dlpack-rs = { git = "https://github.com/kornia/dlpack-rs", tag = "v0.2.0" }
+dlpack-rs = "0.4"
 
 # with pyo3 glue:
-dlpack-rs = { git = "https://github.com/kornia/dlpack-rs", tag = "v0.2.0", features = ["pyo3"] }
+dlpack-rs = { version = "0.4", features = ["pyo3"] }
 ```
+
+The `pyo3` feature targets pyo3 0.30 (Python >= 3.9).
 
 ## Usage
 
